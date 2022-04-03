@@ -12,7 +12,7 @@ namespace SamplePlugin
         public bool SomePropertyToBeSavedAndWithADefault { get; set; } = true;
 
         // the below exist just to make saving less cumbersome
-
+        public bool AutoFaKa;
         [NonSerialized]
         private DalamudPluginInterface? pluginInterface;
 

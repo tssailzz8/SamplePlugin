@@ -61,21 +61,12 @@ namespace SamplePlugin
 
             ImGui.SetNextWindowSize(new Vector2(375, 330), ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowSizeConstraints(new Vector2(375, 330), new Vector2(float.MaxValue, float.MaxValue));
-            if (ImGui.Begin("My Amazing Window", ref this.visible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            if (ImGui.Begin("FaKaWindow", ref this.visible, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                ImGui.Text($"The random config bool is {this.configuration.SomePropertyToBeSavedAndWithADefault}");
 
-                if (ImGui.Button("Show Settings"))
-                {
-                    SettingsVisible = true;
-                }
+               
 
-                ImGui.Spacing();
 
-                ImGui.Text("Have a goat:");
-                ImGui.Indent(55);
-                ImGui.Image(this.goatImage.ImGuiHandle, new Vector2(this.goatImage.Width, this.goatImage.Height));
-                ImGui.Unindent(55);
             }
             ImGui.End();
         }
@@ -92,12 +83,9 @@ namespace SamplePlugin
                 ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 // can't ref a property, so use a local copy
-                var configValue = this.configuration.SomePropertyToBeSavedAndWithADefault;
-                if (ImGui.Checkbox("Random Config Bool", ref configValue))
+                if (ImGui.Checkbox("自动发卡", ref configuration.AutoFaKa))
                 {
-                    this.configuration.SomePropertyToBeSavedAndWithADefault = configValue;
-                    // can save immediately on change, if you don't want to provide a "Save and Close" button
-                    this.configuration.Save();
+                    configuration.Save();
                 }
             }
             ImGui.End();
