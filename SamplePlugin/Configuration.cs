@@ -13,6 +13,7 @@ namespace SamplePlugin
 
         // the below exist just to make saving less cumbersome
         public bool AutoFaKa;
+        public bool AutoChou;
         [NonSerialized]
         private DalamudPluginInterface? pluginInterface;
 

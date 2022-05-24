@@ -87,6 +87,10 @@ namespace SamplePlugin
                 {
                     configuration.Save();
                 }
+                if (ImGui.Checkbox("0.5s后自动进行重抽判定", ref configuration.AutoChou))
+                {
+                    configuration.Save();
+                }
             }
             ImGui.End();
         }

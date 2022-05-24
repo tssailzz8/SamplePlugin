@@ -1,4 +1,5 @@
-﻿using Dalamud.Game.ClientState.JobGauge.Enums;
+﻿using Dalamud.Game;
+using Dalamud.Game.ClientState.JobGauge.Enums;
 using Dalamud.Game.ClientState.JobGauge.Types;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
@@ -24,7 +25,7 @@ namespace SamplePlugin
         public string Name => "Sample Plugin";
 
         private const string commandName = "/faka";
-
+        public DateTime DoSomeThing;
         private static readonly Dictionary<Type, JobGaugeBase> JobGaugeCache = new();
         private CommandManager CommandManager { get; init; }
         public readonly HashSet<ushort> ZeroBuff = new HashSet<ushort>
@@ -65,25 +66,62 @@ namespace SamplePlugin
             
             this.Configuration = DalamudApi.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
             this.Configuration.Initialize(DalamudApi.PluginInterface);
-
             // you might normally want to embed resources and load them from the manifest stream
             var imagePath = Path.Combine(DalamudApi.PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
             var goatImage = DalamudApi.PluginInterface.UiBuilder.LoadImage(imagePath);
             this.PluginUi = new PluginUI(this.Configuration, goatImage);
             DalamudApi.Condition.ConditionChange += Condition_ConditionChange;
-            this.CommandManager.AddHandler(commandName, new CommandInfo(OnCommand)
-            {
-                HelpMessage = "A useful message to display in /xlhelp"
-            });
+            //this.CommandManager.AddHandler(commandName, new CommandInfo(OnCommand)
+            //{
+            //    HelpMessage = "A useful message to display in /xlhelp"
+            //});
             ZoneInfoHandler.Init(DalamudApi.DataManager);
             actionManagerInPtr = (IntPtr)ActionManager.Instance();
             UseActionHook = new Hook<UseActionDelegate>((IntPtr)ActionManager.fpUseAction, UseActionDetour);
             UseActionHook.Enable();
+            DalamudApi.Framework.Update += OnFrameworkUpdate;
             _doActionLocationFunc = Marshal.GetDelegateForFunctionPointer<DoActionLocationDelegate>((IntPtr)ActionManager.fpUseActionLocation);
             DalamudApi.PluginInterface.UiBuilder.Draw += DrawUI;
             DalamudApi.PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUI;
         }
 
+        private unsafe void OnFrameworkUpdate(Framework framework)
+        {
+            if (DateTime.Now.ToString()==DoSomeThing.ToString()&&Configuration.AutoChou)
+            {
+                重抽();
+            }
+        }
+        public unsafe void 重抽()
+        {
+            var gauge = GetJobGauge<ASTGauge>();
+            switch (gauge.DrawnCard)
+            {
+                case CardType.BALANCE:
+                case CardType.BOLE:
+                    if (gauge.ContainsSeal(SealType.SUN))
+                    {
+                        _doActionLocationFunc((long)actionManagerInPtr, 1, 3593, 0xe0000000, default, 0);
+                    }
+                    break;
+                case CardType.ARROW:
+                case CardType.EWER:
+                    if (gauge.ContainsSeal(SealType.MOON))
+                    {
+                        _doActionLocationFunc((long)actionManagerInPtr, 1, 3593, 0xe0000000, default, 0);
+                    }
+                    break;
+                case CardType.SPEAR:
+                case CardType.SPIRE:
+                    if (gauge.ContainsSeal(SealType.CELESTIAL))
+                    {
+                        _doActionLocationFunc((long)actionManagerInPtr, 1, 3593, 0xe0000000, default, 0);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
         private unsafe byte UseActionDetour(ActionManager* actionManager, uint actionType, uint actionID, long targetObjectID, uint param, uint useType, int pvp, bool* isGroundTarget)
         {
             try
@@ -94,13 +132,18 @@ namespace SamplePlugin
                     uint wantObject;
                     if (wantPlayer is null)
                     {
-                        wantObject = 0;
+                        wantObject = DalamudApi.ClientState.LocalPlayer.ObjectId;
                     }
                     else
                     {
                         wantObject = wantPlayer.GameObject.ObjectId;
                     }
                     return UseActionHook.Original(actionManager, actionType, actionID, wantObject, param, 1, pvp, isGroundTarget);
+                }
+                if (Configuration.AutoFaKa && actionID == 3590)
+                {
+                    DoSomeThing = DateTime.Now.AddSeconds(0.1f);
+                    return UseActionHook.Original(actionManager, actionType, actionID, targetObjectID, param, 1, pvp, isGroundTarget);
                 }
             else
                 {
@@ -122,41 +165,86 @@ namespace SamplePlugin
         }
         public Vector3 MiddlePos()
         {
+            var wantVcetor = new Vector3();
             if (DalamudApi.ClientState.LocalPlayer is null)
             {
                 return default;
             }
             var 位置 = DalamudApi.ClientState.TerritoryType;
             var mapInfo = ZoneInfoHandler.GetMapInfoFromTerritoryTypeID(位置);
-            var abc = mapInfo.GetMapCoordinates(new Vector2(0.5f, 0.5f) * 2048.0f);
-            return new Vector3(abc.X, DalamudApi.ClientState.LocalPlayer.Position.Y, abc.Y);
+			for (int i = 0; i < mapInfo.Length; i++)
+			{
+                var abc = mapInfo[i].GetMapCoordinates(new Vector2(0.5f, 0.5f) * 2048.0f);
+                wantVcetor=new Vector3(abc.X, DalamudApi.ClientState.LocalPlayer.Position.Y, abc.Y);
+                var distance = Vector3.Distance(wantVcetor, DalamudApi.ClientState.LocalPlayer.Position);
+				if (distance<20)
+				{
+                    return wantVcetor;
+
+                }
+            }
+            return default;
+        }
+        public bool FindBuff(ushort effectID)
+        {
+            if (DalamudApi.ObjectTable is null)
+            {
+                return false;
+            }
+
+            foreach (var status in DalamudApi.ClientState.LocalPlayer.StatusList)
+            {
+
+                if (status.StatusId == effectID)
+                {
+                    
+                    return true;
+                }
+            }
+
+            return false;
         }
         public void Dispose()
         {
             DalamudApi.Dispose();
             UseActionHook.Disable();
             this.PluginUi.Dispose();
+            DalamudApi.Framework.Update -= OnFrameworkUpdate;
             DalamudApi.Condition.ConditionChange -= Condition_ConditionChange;
             this.CommandManager.RemoveHandler(commandName);
         }
         [Command("/faka")]
-        [HelpMessage("发卡")]
+        [HelpMessage("autoSendCard")]
         private unsafe void OnCommand(string command, string args)
         {
             string[] array = args.Split(new char[]
     {
                     ' '
     });
+            var midddle = MiddlePos();
             switch (array[0])  
             {
                 case "dixing":
                     this.player = DalamudApi.ClientState.LocalPlayer.Address + 176;
                     var roation = DalamudApi.ClientState.LocalPlayer.Rotation;
-                    var midddle = MiddlePos();
+                    
                     var distance = Vector3.Distance(midddle,DalamudApi.ClientState.LocalPlayer.Position);
-                    if (distance>15) return;
                     _doActionLocationFunc((long)actionManagerInPtr, 1, 2262, 0xe0000000, &midddle, 0);
-                    playerR = roation;
+                    break;
+                case "liyi":
+                   
+					if (FindBuff(2709))
+					{
+						UseActionHook.Original(ActionManager.Instance(), 1, 25862, 0xe0000000, 0, 0, 0, (bool*)0);
+
+					}
+					else
+					{
+                        _doActionLocationFunc((long)actionManagerInPtr, 1, 25862, 0xe0000000, &midddle, 0);
+                    }
+					break;
+                case "chong":
+                    重抽();
                     break;
                 default:
                   var wantPlayer=DOCompute();
@@ -198,8 +286,14 @@ namespace SamplePlugin
             }
             foreach (var p in DalamudApi.PartyList)
             {
+                var distance = Vector3.Distance(p.Position,DalamudApi.ClientState.LocalPlayer.Position);
+                if (distance<30)
+                {
+                    break;
+                }
                 foreach (var item in JobData.data)
                 {
+
                     if (p.ClassJob.Id==(uint)item.JobClass)
                     {
                         
@@ -215,7 +309,7 @@ namespace SamplePlugin
                                 {
                                     wantParm1 = 1f;
                                 }
-                                wantParm1 = data.Value;
+                                wantParm1 = wantParm1* data.Value;
                             }
                         }
                         //var hasBuff = FindBuff((ushort)item.BuffID, (BattleChara)p.GameObject);
@@ -226,21 +320,21 @@ namespace SamplePlugin
                                 wantParm1 = wantParm1 * down.Value;
                             }
                         }
-                        if (FindBuff(0x2c, (BattleChara)p.GameObject))
-                        {
-                            wantParm1 = wantParm1 * 0.375f;
-                        }
-                        if (FindBuff(0x2b, (BattleChara)p.GameObject))
-                        {
-                            wantParm1 = wantParm1 * 0.25f;
-                        }
-                        else
-                        {
-                            wantParm1 = item.CommonCoefficient;
-                        }
+                        //if (FindBuff(0x2c, (BattleChara)p.GameObject))
+                        //{
+                        //    wantParm1 = wantParm1 * 0.375f;
+                        //}
+                        //if (FindBuff(0x2b, (BattleChara)p.GameObject))
+                        //{
+                        //    wantParm1 = wantParm1 * 0.25f;
+                        //}
+                        //else
+                        //{
+                        //    wantParm1 = item.CommonCoefficient;
+                        //}
                         switch (gauge.DrawnCard)
                         {
-                            case CardType.NONE:
+                            case CardType.SPEAR:
                             case CardType.BALANCE:
                             case CardType.ARROW:
                                 if (role == Role.近)
@@ -252,7 +346,7 @@ namespace SamplePlugin
                                     wantParm1 = wantParm1 * 1.03f;
                                 }
                                 break;
-                            case CardType.SPEAR:
+                            case CardType.SPIRE:
                             case CardType.BOLE:
                             case CardType.EWER:
                                 if (role == Role.近)

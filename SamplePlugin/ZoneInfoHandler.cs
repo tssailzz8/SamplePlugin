@@ -125,16 +125,16 @@ namespace SamplePlugin
 			return mZoneInfoDict;
 		}
 
-		public static MapInfo GetMapInfoFromTerritoryTypeID( uint ID )
+		public static MapInfo[] GetMapInfoFromTerritoryTypeID( uint ID )
 		{
 			string mapBaseName = GetZoneInfoFromTerritoryTypeID( ID ).MapBaseName;
 			if( mMapInfoDict.ContainsKey( mapBaseName ) )
 			{
-				return mMapInfoDict[mapBaseName].FirstOrDefault();
+				return mMapInfoDict[mapBaseName].ToArray();
 			}
 			else
 			{
-				return new MapInfo();
+				return new MapInfo[0];
 			}
 		}
 

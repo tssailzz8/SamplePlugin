@@ -40,27 +40,27 @@
 
   <ItemGroup>
     <Reference Include="Dalamud">
-      <HintPath>..\..\..\dalaba\6.3.0.8\Dalamud.dll</HintPath>
+      <HintPath>C:\Users\牙刷666\AppData\Roaming\XIVLauncher\addon\Hooks\dev\Dalamud.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="FFXIVClientStructs">
-      <HintPath>..\..\..\dalaba\6.3.0.8\FFXIVClientStructs.dll</HintPath>
-      <Private>false</Private>
+      <HintPath>C:\Users\牙刷666\AppData\Roaming\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll</HintPath>
+		<Private>false</Private>
     </Reference>
     <Reference Include="ImGui.NET">
-      <HintPath>..\..\..\dalaba\6.3.0.8\ImGui.NET.dll</HintPath>
+      <HintPath>C:\Users\牙刷666\AppData\Roaming\XIVLauncher\addon\Hooks\dev\ImGui.NET.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="ImGuiScene">
-      <HintPath>..\..\..\dalaba\6.3.0.8\ImGuiScene.dll</HintPath>
+      <HintPath>C:\Users\牙刷666\AppData\Roaming\XIVLauncher\addon\Hooks\dev\ImGuiScene.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Lumina">
-      <HintPath>..\..\..\dalaba\6.3.0.8\Lumina.dll</HintPath>
+      <HintPath>C:\Users\牙刷666\AppData\Roaming\XIVLauncher\addon\Hooks\dev\Lumina.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Lumina.Excel">
-      <HintPath>..\..\..\dalaba\6.3.0.8\Lumina.Excel.dll</HintPath>
+      <HintPath>C:\Users\牙刷666\AppData\Roaming\XIVLauncher\addon\Hooks\dev\Lumina.Excel.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
