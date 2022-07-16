@@ -59,8 +59,9 @@ namespace SamplePlugin
         }
         public unsafe Plugin(
              DalamudPluginInterface pluginInterface,
-            CommandManager commandManager)
+            CommandManager commandManager, SigScanner sigScanner)
         {
+            FFXIVClientStructs.Resolver.Initialize(sigScanner.SearchBase);
             DalamudApi.Initialize(this, pluginInterface);
             this.CommandManager = commandManager;
             
@@ -194,10 +195,10 @@ namespace SamplePlugin
 
             foreach (var status in DalamudApi.ClientState.LocalPlayer.StatusList)
             {
+                //PluginLog.Log($"{status.StatusId}");
 
                 if (status.StatusId == effectID)
                 {
-                    
                     return true;
                 }
             }
@@ -225,11 +226,14 @@ namespace SamplePlugin
             switch (array[0])  
             {
                 case "dixing":
-                    this.player = DalamudApi.ClientState.LocalPlayer.Address + 176;
-                    var roation = DalamudApi.ClientState.LocalPlayer.Rotation;
-                    
-                    var distance = Vector3.Distance(midddle,DalamudApi.ClientState.LocalPlayer.Position);
-                    _doActionLocationFunc((long)actionManagerInPtr, 1, 2262, 0xe0000000, &midddle, 0);
+                    if (FindBuff(1224))
+                    {
+                        UseActionHook.Original(ActionManager.Instance(), 1, 7439, 0xe0000000, 0, 0, 0, (bool*)0);
+                    }
+                    else
+                    {
+                        _doActionLocationFunc((long)actionManagerInPtr, 1, 7439, 0xe0000000, &midddle, 0);
+                    }
                     break;
                 case "liyi":
                    

@@ -44,8 +44,8 @@
       <Private>false</Private>
     </Reference>
     <Reference Include="FFXIVClientStructs">
-      <HintPath>C:\Users\牙刷666\AppData\Roaming\XIVLauncher\addon\Hooks\dev\FFXIVClientStructs.dll</HintPath>
-		<Private>false</Private>
+      <HintPath>E:\Dalamud\addon\Hooks\dev\FFXIVClientStructs.dll</HintPath>
+	<Private>false</Private>
     </Reference>
     <Reference Include="ImGui.NET">
       <HintPath>C:\Users\牙刷666\AppData\Roaming\XIVLauncher\addon\Hooks\dev\ImGui.NET.dll</HintPath>
